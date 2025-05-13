@@ -1,0 +1,35 @@
+{
+  "stun_server": {
+    "tcp": ["fwa.lifesizecloud.com",
+      "stun.isp.net.au",
+      "stun.freeswitch.org",
+      "stun.voip.blackberry.com",
+      "stun.nextcloud.com",
+      "stun.stunprotocol.org",
+      "stun.sipnet.com",
+      "stun.radiojar.com",
+      "stun.sonetel.com",
+      "stun.voipgate.com"],
+    "udp": ["stun.miwifi.com",
+      "stun.qq.com",
+      "stun.syncthing.net"]
+  },
+  "keep_alive": "www.qq.com",
+  "interval": 10,
+  "open_port": {
+    "tcp": ["0.0.0.0:2888"],
+    "udp": ["0.0.0.0:6000"]
+  },
+  "forward_port": {
+    "tcp": ["127.0.0.1:2888"],
+    "udp": ["127.0.0.1:8000"]
+  },
+  "status_report": {
+    "hook": "echo mapped from {inner_ip}:{inner_port} to {outer_ip}:{outer_port}",
+    "status_file": "status.json"
+  },
+  "logging": {
+    "level": "info",
+    "log_file": ""
+  }
+}
