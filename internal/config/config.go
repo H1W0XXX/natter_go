@@ -39,6 +39,7 @@ type Logging struct {
 // Config 是整个配置文件结构
 // Interval 单位为秒，用于控制映射检测和保活间隔
 type Config struct {
+	EnableUPnP   bool         `json:"enable_upnp"` // 是否启用 UPnP 映射
 	StunServer   StunServer   `json:"stun_server"`
 	KeepAlive    string       `json:"keep_alive"`
 	Interval     int          `json:"interval"`

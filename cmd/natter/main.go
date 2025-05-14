@@ -116,3 +116,6 @@ func main() {
 	n.Run(ctx)
 	logger.Info("Exited natter")
 }
+
+// cd /d/go/natter/
+// GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -trimpath" -o natter-linux-amd64 ./cmd/natter

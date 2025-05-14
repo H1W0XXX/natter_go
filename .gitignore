@@ -1,5 +1,7 @@
-# 忽略编译后的可执行文件
-*.exe
+# 忽略所有平台的构建产物
+natter
+natter.exe
+natter-*
 
 # 忽略 Go 缓存文件
 *.out
