@@ -30,6 +30,7 @@ type Natter struct {
 	udpOpens []net.UDPAddr
 	tcpFwds  []*forward.TCPForwarder
 	udpFwds  []*forward.UDPForwarder
+	bindIP   net.IP
 }
 
 // New creates a Natter instance with configuration and logger.
@@ -87,6 +88,12 @@ func portOf(addr string) string {
 
 // Run starts UPnP mapping, status manager, forwarders, keep-alive, and STUN workers until context cancel.
 func (n *Natter) Run(ctx context.Context) {
+	if n.bindIP == nil || n.bindIP.IsUnspecified() {
+		n.bindIP = n.getOutboundIP() // 建议换成固定 DNS，如 "119.29.29.29:53" 的探路实现
+	}
+	n.logger.Info("bind ip decided", zap.String("bind_ip", n.bindIP.String()))
+	n.stunClient.SetBindIP(n.bindIP)
+
 	// UPnP port mapping if enabled
 	if n.cfg.EnableUPnP {
 		cli, err := upnp.Discover(n.logger)
@@ -138,15 +145,16 @@ func (n *Natter) Run(ctx context.Context) {
 	}
 
 	// Open port tasks: keep-alive + mapping detection
-	for _, addr := range n.tcpOpens {
-		// Run STUN worker
+	for _, a := range n.tcpOpens {
+		addr := a // ✅ 复制一份，避免 &addr 指向同一个循环变量
+		// keepalive 绑定到“真实本地 IP:监听端口”
+		laddr := &net.TCPAddr{IP: n.bindIP, Port: addr.Port}
+		go keepalive.TCPKeepAlive(ctx, laddr, n.cfg.KeepAlive, n.interval, n.logger)
 		go n.runWorker(ctx, "tcp", &addr)
-		// Start TCP keep-alive (use temporary local port)
-		local := &net.TCPAddr{IP: addr.IP, Port: 0}
-		go keepalive.TCPKeepAlive(ctx, local, n.cfg.KeepAlive, n.interval, n.logger)
 	}
-	for _, addr := range n.udpOpens {
+	for _, a := range n.udpOpens {
 		// Listen for UDP Keep-Alive
+		addr := a
 		pc, err := net.ListenPacket("udp", addr.String())
 		if err != nil {
 			n.logger.Warn("UDP listen failed", zap.Error(err))
