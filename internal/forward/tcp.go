@@ -31,7 +31,7 @@ func NewTCPForwarder(listenAddr, targetAddr string, logger *zap.Logger) *TCPForw
 // Start 启动转发器，开始监听并接受连接。
 // ctx 用于优雅关闭。
 func (f *TCPForwarder) Start(ctx context.Context) error {
-	ln, err := net.Listen("tcp", f.ListenAddr)
+	ln, err := listenWithReuse(ctx, f.ListenAddr)
 	if err != nil {
 		f.logger.Error("cannot listen on TCP address", zap.String("addr", f.ListenAddr), zap.Error(err))
 		return err

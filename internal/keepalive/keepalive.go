@@ -5,18 +5,14 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
-	"golang.org/x/sys/windows"
 	"io"
 	"math"
 	mr "math/rand"
 	"net"
-	"syscall"
 	"time"
 
 	"go.uber.org/zap"
 )
-
-const SO_EXCLUSIVEADDRUSE = 0x0004
 
 // minInterval 保底 5 秒
 func minInterval(d time.Duration) time.Duration {
@@ -148,23 +144,5 @@ func UDPKeepAlive(ctx context.Context, conn net.PacketConn, host string, port in
 			return
 		case <-ticker.C:
 		}
-	}
-}
-
-// 封装一个 Dialer，保证能复用端口
-func newDialerWithReuse(laddr *net.TCPAddr) net.Dialer {
-	return net.Dialer{
-		LocalAddr: laddr,
-		Timeout:   3 * time.Second,
-		Control: func(network, address string, c syscall.RawConn) error {
-			var serr error
-			c.Control(func(fd uintptr) {
-				// Windows 默认是 SO_EXCLUSIVEADDRUSE=1，要关掉
-				_ = windows.SetsockoptInt(windows.Handle(fd), windows.SOL_SOCKET, SO_EXCLUSIVEADDRUSE, 0)
-				// 显式开 REUSEADDR
-				_ = windows.SetsockoptInt(windows.Handle(fd), windows.SOL_SOCKET, windows.SO_REUSEADDR, 1)
-			})
-			return serr
-		},
 	}
 }

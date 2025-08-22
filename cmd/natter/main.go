@@ -118,5 +118,7 @@ func main() {
 }
 
 // cd /d/go/natter/
-// GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -trimpath" -o natter-linux-amd64 ./cmd/natter
+// export CGO_ENABLED=0
+// GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o natter-linux-amd64 ./cmd/natter
+
 // go build -ldflags="-s -w" -gcflags="all=-trimpath=${PWD}" -asmflags="all=-trimpath=${PWD}" -o natter.exe .\cmd\natter\main.go

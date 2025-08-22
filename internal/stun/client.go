@@ -151,10 +151,4 @@ func (c *Client) GetTCPMapping(srcPort int) (*Mapping, error) {
 	return nil, fmt.Errorf("all TCP STUN servers failed")
 }
 
-func pickOutboundIP(to string) net.IP {
-	c, _ := net.Dial("udp4", to) // 例如 "8.8.8.8:53"
-	defer c.Close()
-	return c.LocalAddr().(*net.UDPAddr).IP
-}
-
 func (c *Client) SetBindIP(ip net.IP) { c.bindIP = ip }

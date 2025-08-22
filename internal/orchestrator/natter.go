@@ -206,13 +206,17 @@ func (n *Natter) runWorker(ctx context.Context, proto string, addr net.Addr) {
 
 // getOutboundIP returns the machine's preferred outbound IP.
 func (n *Natter) getOutboundIP() net.IP {
-	raddr := net.JoinHostPort(n.cfg.KeepAlive, "80")
-	conn, err := net.Dial("udp", raddr)
+	// 用 IPv4 目的地址探路，强制走 IPv4 路径
+	c, err := net.Dial("udp4", "119.29.29.29:53") // 或 "1.1.1.1:53"
 	if err != nil {
-		return net.ParseIP("127.0.0.1")
+		return net.IPv4(127, 0, 0, 1)
 	}
-	defer conn.Close()
-	return conn.LocalAddr().(*net.UDPAddr).IP
+	defer c.Close()
+	ip := c.LocalAddr().(*net.UDPAddr).IP.To4()
+	if ip == nil {
+		return net.IPv4(127, 0, 0, 1)
+	}
+	return ip
 }
 
 // formatInner formats the inner address, replacing 0.0.0.0 with actual IP.
